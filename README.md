@@ -32,13 +32,17 @@ Solution:
 - Automated updates to maintain connectivity
 
 ## Commands Used
+
 ```bash
 wg genkey
 wg pubkey
 wg-quick up wg0
 wg show
+```
 
 ## Network Architecture
+
+```
 Client (Phone)
       |
       |  WireGuard VPN (UDP 51820)
@@ -52,10 +56,11 @@ Client (Phone)
 [ Local Network 192.168.1.0/24 ]
       |
 [ Internal Devices (VMs, SSH, etc) ]
+```
 
 ## Sample Client Configuration
 
-```ini
+ini
 [Interface]
 PrivateKey = (hidden)
 Address = 10.8.0.11/32
