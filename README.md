@@ -72,59 +72,18 @@ Endpoint = techmann.duckdns.org:51820
 AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 
-## Troubleshooting
+## ### 🛠 Troubleshooting Guide
 
-### Issue: VPN connects but cannot access LAN
-- **Cause:** Missing route to local network
-- **Fix:** Added local network to AllowedIPs
-AllowedIPs = 0.0.0.0/0, ::/0, 192.168.1.0/24
----
+| Issue | Potential Cause | Recommended Fix |
+| :--- | :--- | :--- |
+| **Connected, no LAN access** | Missing static route to local subnet. | Add local network (e.g., `192.168.1.0/24`) to `AllowedIPs`. |
+| **Fails after Public IP change** | ISP rotated your dynamic IP. | Use DuckDNS; update `Endpoint` to your domain name. |
+| **Handshake OK, no traffic** | UDP traffic being throttled/blocked. | Switch to mobile data or use an alternative port (e.g., `443`). |
+| **Cannot SSH via VPN** | Firewall blocking Port 22 or bad routing. | Ensure Port 22 is open; verify routing with `wg show`. |
+| **No IP / No connectivity** | Peer not added or misconfigured client. | Verify client IP (e.g., `10.8.0.x`); restart with `wg-quick`. |
+| **Changes not applying** | WireGuard service wasn't refreshed. | Run `wg syncconf` or restart the interface. |
+| **DNS not resolving** | Missing DNS entry in client config. | Add `DNS = 1.1.1.1` to the `[Interface]` section. |
 
-### Issue: VPN stops working after public IP change
-- **Cause:** Dynamic public IP from ISP
-- **Fix:** Implemented DuckDNS and updated endpoint
-Endpoint = techmann.duckdns.org:51820
----
-
-### Issue: VPN handshake successful but no traffic (restricted WiFi)
-- **Cause:** Network blocking or limiting UDP traffic
-- **Observation:** VPN shows connected but no access to LAN or internet
-- **Workarounds:**
-- Switch to mobile data to establish connection
-- Use alternative ports (e.g., 443)
-- Consider UDP tunneling tools (advanced)
-
----
-
-### Issue: Cannot SSH into home network via VPN
-- **Cause:** SSH not allowed through firewall or incorrect routing
-- **Fix:**
-- Ensure SSH port (22) is open internally
-- Confirm VPN subnet routing is correct
-- Verify WireGuard interface is active
-wg show
----
-
-### Issue: Client not receiving IP / no connectivity
-- **Cause:** Misconfigured client config or missing peer setup
-- **Fix:**
-- Verify client IP assignment (e.g., 10.8.0.x/32)
-- Ensure peer is added on server
-- Restart interface
-wg-quick down wg0
-wg-quick up wg0
----
-
-### Issue: Config changes not applied
-- **Cause:** WireGuard not reloaded
-- **Fix:**
-wg syncconf wg0 <(wg-quick strip wg0)
----
-
-### Issue: DNS not resolving when connected to VPN
-- **Cause:** Missing DNS configuration in client
-- **Fix:**
-DNS = 1.1.1.1
 ---
 
 ## Security Hardening
