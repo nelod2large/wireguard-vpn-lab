@@ -125,3 +125,41 @@ wg syncconf wg0 <(wg-quick strip wg0)
 - **Cause:** Missing DNS configuration in client
 - **Fix:**
 DNS = 1.1.1.1
+---
+
+## Security Hardening
+
+### Key Security Measures Implemented
+
+- **Private key protection**
+  - Client and server private keys are never exposed or shared
+  - Sensitive values removed from all shared configurations
+
+- **Restricted SSH access**
+  - SSH access limited to VPN network only
+  - Public SSH exposure avoided where possible
+
+- **Firewall considerations**
+  - Only required port (UDP 51820) exposed on router
+  - Internal services restricted to local/VPN network
+
+- **PersistentKeepalive configuration**
+  - Maintains secure and stable tunnel for remote clients behind NAT
+
+---
+
+### Recommended Improvements (Future Work)
+
+- Implement firewall rules using pfSense
+- Restrict SSH access strictly to VPN subnet (10.8.0.0/24)
+- Disable password authentication for SSH (use key-based login only)
+- Add intrusion detection (e.g., Fail2Ban)
+- Use non-standard ports where appropriate to reduce scanning exposure
+
+---
+
+### Security Considerations
+
+- VPN provides encryption but does not eliminate endpoint risks
+- Device security (client-side) remains critical
+- Strong key management is essential for maintaining secure access
