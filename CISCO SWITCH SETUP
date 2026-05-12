@@ -1,0 +1,464 @@
+# Cisco Catalyst 3650 Lab Recovery & Initial Setup
+
+## Overview
+
+This repository documents my experience purchasing and recovering a used Cisco Catalyst 3650-24TD-S switch for my home networking and CCNA lab.
+
+The goal was to:
+
+- Build a real physical networking lab
+- Learn enterprise switching hands-on
+- Move beyond Packet Tracer simulations
+- Practice VLANs, routing, SSH, and enterprise troubleshooting
+
+---
+
+# Hardware Used
+
+## Core Devices
+
+- Cisco Catalyst 3650-24TD-S
+- TalkTalk Home Router
+- Windows PC
+- Ethernet cables
+- USB Console Cable
+- PuTTY
+
+## Future Expansion
+
+- MikroTik hEX
+- PoE Switch
+- TP-Link 3-in-1 Access Point
+- Kali Raspberry Pi
+- VMware Lab
+
+---
+
+# Initial Problem
+
+After purchasing the switch, I discovered it was still configured with an old corporate configuration.
+
+The switch booted with:
+
+- Existing hostname
+- Existing startup configuration
+- Daisy/corporate references
+- Restricted configuration behavior
+- SFP uplink security restrictions
+
+I could not immediately use the switch for my own lab.
+
+---
+
+# Problems Encountered
+
+## 1. Existing Corporate Configuration
+
+Symptoms:
+
+- Unexpected hostname/banner
+- Existing configuration loaded automatically
+- Unknown passwords/configuration
+- Difficulty entering clean configuration mode
+
+---
+
+## 2. Console Access Difficulties
+
+Initially struggled with:
+
+- PuTTY serial settings
+- COM port selection
+- Console cable communication
+
+Correct PuTTY settings eventually used:
+
+```text
+Connection Type: Serial
+Speed (Baud): 9600
+Data Bits: 8
+Stop Bits: 1
+Parity: None
+Flow Control: None
+```
+
+---
+
+## 3. SFP Transceiver Issues
+
+I attempted to use an RJ45 SFP transceiver in the uplink ports.
+
+The switch produced errors such as:
+
+```text
+gbic-invalid
+SFP security check fail
+err-disabled
+```
+
+Cisco rejected the non-Cisco-coded transceiver module.
+
+---
+
+## 4. No Internet Connectivity
+
+At one stage:
+
+- Local LAN connectivity worked
+- I could ping the router
+- But internet access failed
+
+Later I could:
+
+```bash
+ping 8.8.8.8
+```
+
+but Chrome failed with:
+
+```text
+ERR_NAME_NOT_RESOLVED
+```
+
+This turned out to be a DNS issue.
+
+---
+
+# Recovery & Troubleshooting Process
+
+# Step 1 — Console Access
+
+Connected using:
+
+```text
+PC → USB Console Cable → Switch Console Port
+```
+
+Used PuTTY for serial access.
+
+---
+
+# Step 2 — Basic Interface Verification
+
+Used:
+
+```cisco
+show ip interface brief
+```
+
+This helped verify:
+
+- VLAN interfaces
+- Port states
+- Management IP
+- Connected devices
+
+---
+
+# Step 3 — Verified Active Interfaces
+
+Observed:
+
+```text
+Gi1/0/4 up/up
+```
+
+for the PC connection.
+
+This confirmed:
+
+- Physical link
+- Ethernet negotiation
+- Layer 1 connectivity
+
+---
+
+# Step 4 — Configured Switch Management IP
+
+Configured VLAN1:
+
+```cisco
+interface vlan1
+ip address 192.168.1.10 255.255.255.0
+no shutdown
+```
+
+---
+
+# Step 5 — Connected TalkTalk Router
+
+Connected:
+
+```text
+TalkTalk Router → Gi1/0/1
+```
+
+Initially attempted SFP uplinks but later moved to normal RJ45 copper ports for simplicity.
+
+---
+
+# Step 6 — Enabled Interfaces
+
+Configured:
+
+```cisco
+interface gi1/0/1
+no shutdown
+```
+
+---
+
+# Step 7 — Configured Default Gateway
+
+Configured:
+
+```cisco
+ip default-gateway 192.168.1.1
+```
+
+Important lesson learned:
+
+- Switch management IP is NOT the default gateway for internet traffic
+- The router must be the default gateway
+
+Incorrect:
+
+```text
+Gateway = 192.168.1.10
+```
+
+Correct:
+
+```text
+Gateway = 192.168.1.1
+```
+
+---
+
+# Step 8 — DNS Troubleshooting
+
+I could ping:
+
+```bash
+ping 8.8.8.8
+```
+
+but web browsing failed.
+
+Problem identified:
+
+```text
+DNS resolution failure
+```
+
+Fixed by manually configuring:
+
+```text
+Primary DNS: 8.8.8.8
+Secondary DNS: 1.1.1.1
+```
+
+After this:
+
+- Chrome worked
+- Websites resolved successfully
+- Full internet connectivity restored
+
+---
+
+# SFP Troubleshooting
+
+The switch rejected the non-Cisco transceiver.
+
+Used:
+
+```cisco
+service unsupported-transceiver
+```
+
+and:
+
+```cisco
+no errdisable detect cause gbic-invalid
+```
+
+However, due to instability and compatibility issues, I decided to continue using standard RJ45 access ports for the lab.
+
+This is still fully suitable for:
+
+- VLAN labs
+- Routing
+- SSH
+- Inter-VLAN routing
+- CCNA studies
+
+---
+
+# Current Working Topology
+
+```text
+Internet
+   │
+TalkTalk Router (192.168.1.1)
+   │
+Gi1/0/1
+Cisco Catalyst 3650
+   │
+Gi1/0/4
+Windows PC
+```
+
+---
+
+# Current Working Configuration
+
+## Switch Management
+
+```text
+IP Address: 192.168.1.10
+Subnet Mask: 255.255.255.0
+Gateway: 192.168.1.1
+```
+
+## PC
+
+```text
+IP Address: 192.168.1.x
+Gateway: 192.168.1.1
+DNS: 8.8.8.8 / 1.1.1.1
+```
+
+---
+
+# Skills Learned
+
+This project helped reinforce:
+
+- Cisco IOS navigation
+- Console recovery
+- Interface administration
+- Layer 1 troubleshooting
+- VLAN management interfaces
+- Default gateway concepts
+- DNS troubleshooting
+- Ethernet negotiation
+- SFP troubleshooting
+- Enterprise switching fundamentals
+- Physical network topology
+- Real hardware troubleshooting
+
+---
+
+# Next Planned Improvements
+
+## Planned Hardware
+
+- MikroTik hEX
+- PoE switch
+- TP-Link AP
+- Kali Raspberry Pi
+- VMware server
+
+---
+
+# Future Goals
+
+## VLAN Architecture
+
+| VLAN | Purpose |
+|------|----------|
+| 10 | Staff/Lab |
+| 20 | Guest |
+| 30 | CCTV |
+| 99 | Management |
+
+---
+
+# Planned Topology
+
+```text
+Internet
+   │
+TalkTalk Router
+   │
+MikroTik hEX
+   │
+Cisco 3650
+   ├── PoE Switch
+   ├── Access Point
+   ├── CCTV
+   ├── Kali Pi
+   └── Lab Devices
+```
+
+---
+
+# Planned Technologies
+
+- VLANs
+- Trunking
+- Inter-VLAN routing
+- DHCP
+- OSPF
+- ACLs
+- SSH management
+- WireGuard VPN
+- Monitoring
+- Grafana
+- pfSense
+- MikroTik RouterOS
+
+---
+
+# Key Lessons Learned
+
+## Layer 2 vs Layer 3
+
+A switch management IP does not automatically make the switch a router.
+
+Switches primarily forward traffic using:
+
+```text
+MAC addresses
+```
+
+Routers forward traffic using:
+
+```text
+IP routing
+```
+
+---
+
+## DNS vs Connectivity
+
+Being able to ping:
+
+```bash
+ping 8.8.8.8
+```
+
+does NOT guarantee DNS is working.
+
+Websites require:
+
+```text
+DNS name resolution
+```
+
+---
+
+# Conclusion
+
+This project marked my transition from simulation-only networking into real enterprise hardware networking.
+
+Working with:
+
+- physical switches
+- interface states
+- SFP modules
+- DNS issues
+- default gateways
+- console recovery
+
+provided significantly deeper practical understanding than Packet Tracer alone.
